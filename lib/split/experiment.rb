@@ -2,15 +2,13 @@
   class Experiment
     attr_accessor :name
     attr_writer :algorithm
-    attr_accessor :archived
     attr_accessor :resettable
     attr_accessor :goals
     attr_accessor :alternatives
     attr_accessor :alternative_probabilities
 
     DEFAULT_OPTIONS = {
-      :resettable => true,
-      :archived => false
+      :resettable => true
     }
 
     def initialize(name, options = {})
@@ -25,16 +23,14 @@
           alternatives: load_alternatives_from_configuration,
           goals: load_goals_from_configuration,
           resettable: exp_config[:resettable],
-          algorithm: exp_config[:algorithm],
-          archived: exp_config[:archived]
+          algorithm: exp_config[:algorithm]
         )
       else
         set_alternatives_and_options(
           alternatives: alternatives,
           goals: options[:goals],
           resettable: options[:resettable],
-          algorithm: options[:algorithm],
-          archived: options[:archived]
+          algorithm: options[:algorithm]
         )
       end
     end
@@ -43,7 +39,6 @@
       self.alternatives = options[:alternatives]
       self.goals = options[:goals]
       self.resettable = options[:resettable]
-      self.archived = options[:archived]
       self.algorithm = options[:algorithm]
     end
 
@@ -63,7 +58,6 @@
           options[:goals] = load_goals_from_configuration
           options[:resettable] = exp_config[:resettable]
           options[:algorithm] = exp_config[:algorithm]
-          options[:archived] = exp_config[:archived]
         end
       end
 
@@ -71,7 +65,6 @@
       self.goals = options[:goals]
       self.algorithm = options[:algorithm]
       self.resettable = options[:resettable]
-      self.archived = options[:archived]
 
       # calculate probability that each alternative is the winner
       @alternative_probabilities = {}
@@ -187,15 +180,27 @@
     end
 
     def archived?
-      return Split.redis.hget(experiment_config_key, :archived) == 'true'
+      return Split.redis.hget(:experiment_archived, name)
+    end
+
+    def archived_at
+      t = Split.redis.hget(:experiment_archived, name)
+      if t
+        # Check if stored time is an integer
+        if t =~ /^[-+]?[0-9]+$/
+          t = Time.at(t.to_i)
+        else
+          t = Time.parse(t)
+        end
+      end
     end
 
     def archive!
-      Split.redis.hset(experiment_config_key, :archived, true)
+      Split.redis.hset(:experiment_archived, name, Time.now.to_i)
     end    
 
     def unarchive!
-      Split.redis.hset(experiment_config_key, :archived, false)
+      Split.redis.hdel(:experiment_archived, name)
     end    
 
     def participant_count

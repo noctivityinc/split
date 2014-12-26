@@ -20,12 +20,21 @@
       <% end %>
     </h2>
 
-    <% if goal.nil? %>
+    <% if experiment.archived? %>
       <div class='inline-controls'>
-        <small><%= experiment.start_time ? experiment.start_time.strftime('%Y-%m-%d') : 'Unknown' %></small>
+        <small>Archived: <%= experiment.archived_at.strftime('%Y-%m-%d') %></small>
         <%= erb :_controls, :locals => {:experiment => experiment} %>
       </div>
-    <% end %>
+    <% else %>
+
+      <% if goal.nil? %>
+        <div class='inline-controls'>
+          <small><%= experiment.start_time ? experiment.start_time.strftime('%Y-%m-%d') : 'Unknown' %></small>
+          <%= erb :_controls, :locals => {:experiment => experiment} %>
+        </div>
+      <% end %>    
+
+    <% end %>    
   </div>
   <table>
     <tr>

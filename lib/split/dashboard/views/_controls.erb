@@ -17,9 +17,11 @@
       <input type="submit" value="Start">
     </form>
   <% end %>
-  <form action="<%= url "/archive/#{experiment.name}" %>" method='post' onclick="return confirmArchive()">
-    <input type="submit" value="Archive">
-  </form>
+  <% if experiment.has_winner? %>
+    <form action="<%= url "/archive/#{experiment.name}" %>" method='post' onclick="return confirmArchive()">
+      <input type="submit" value="Archive">
+    </form>
+  <% end %>    
 
 <% end %>
 
