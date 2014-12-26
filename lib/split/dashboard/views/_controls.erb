@@ -1,17 +1,30 @@
-<% if experiment.has_winner? %>
-  <form action="<%= url "/reopen/#{experiment.name}" %>" method='post' onclick="return confirmReopen()">
-    <input type="submit" value="Reopen Experiment">
+<% if experiment.archived? %>
+  <form action="<%= url "/unarchive/#{experiment.name}" %>" method='post' onclick="return confirmUnarchive()">
+    <input type="submit" value="Unarchive Experiment">
   </form>
+<% else %>
+  <% if experiment.has_winner? %>
+    <form action="<%= url "/reopen/#{experiment.name}" %>" method='post' onclick="return confirmReopen()">
+      <input type="submit" value="Reopen Experiment">
+    </form>
+  <% end %>
+  <% if experiment.start_time %>
+    <form action="<%= url "/reset/#{experiment.name}" %>" method='post' onclick="return confirmReset()">
+      <input type="submit" value="Reset Data">
+    </form>
+  <% else%>
+    <form action="<%= url "/start/#{experiment.name}" %>" method='post'>
+      <input type="submit" value="Start">
+    </form>
+  <% end %>
+  <form action="<%= url "/archive/#{experiment.name}" %>" method='post' onclick="return confirmArchive()">
+    <input type="submit" value="Archive">
+  </form>
+
 <% end %>
-<% if experiment.start_time %>
-  <form action="<%= url "/reset/#{experiment.name}" %>" method='post' onclick="return confirmReset()">
-    <input type="submit" value="Reset Data">
-  </form>
-<% else%>
-  <form action="<%= url "/start/#{experiment.name}" %>" method='post'>
-    <input type="submit" value="Start">
-  </form>
-<% end %>
+
+
+
 <form action="<%= url "/#{experiment.name}" %>" method='post' onclick="return confirmDelete()">
   <input type="hidden" name="_method" value="delete"/>
   <input type="submit" value="Delete" class="red">

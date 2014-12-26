@@ -11,16 +11,27 @@
 </head>
 <body>
   <div class="header">
-    <h1>Split Dashboard</h1>
+    <h1>
+      Split Dashboard
+      <small><%= @subtitle %></small>
+    </h1>
     <p class="environment"><%= @current_env %></p>
   </div>
 
   <div id="main">
     <%= yield %>
+
+    <div id="viewControls">
+      <% if @page == :archived %>
+        <a href="active">Active Experiments (<%= @active.count %>)</a>
+      <% elsif @page == :active && @archived.count > 0 %>
+        <a href="archived">Archived Experiments (<%= @archived.count %>)</a>
+      <% end %>
+    </div>
   </div>
 
   <div id="footer">
-    <p>Powered by <a href="http://github.com/andrew/split">Split</a> v<%=Split::VERSION %></p>
+    <p>Powered by <a href="http://github.com/andrew/split">Split</a> v<%=Split::VERSION %> with archiving</p>
   </div>
 </body>
 </html>

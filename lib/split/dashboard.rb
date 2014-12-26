@@ -18,6 +18,9 @@ module Split
       # Display experiments without a winner at the top of the dashboard
       @experiments = Split::Experiment.all_active_first
 
+      # get archived for link display
+      @archived = Split::Experiment.archived
+
       @metrics = Split::Metric.all
 
       # Display Rails Environment mode (or Rack version if not using Rails)
@@ -26,6 +29,36 @@ module Split
       else
         @current_env = "Rack: #{Rack.version}"
       end
+
+      @subtitle = 'Active'
+      @page = :active
+
+      erb :index
+    end
+
+    get '/active' do
+      redirect url('/')
+    end
+
+    get '/archived' do
+      # Display experiments without a winner at the top of the dashboard
+      @experiments = Split::Experiment.archived
+
+      # get active for link display
+      @active = Split::Experiment.all_active_first
+
+      @metrics = Split::Metric.all
+
+      # Display Rails Environment mode (or Rack version if not using Rails)
+      if Object.const_defined?('Rails')
+        @current_env = Rails.env.titlecase
+      else
+        @current_env = "Rack: #{Rack.version}"
+      end
+
+      @subtitle = 'Archived'
+      @page = :archived
+
       erb :index
     end
 
@@ -51,6 +84,18 @@ module Split
     post '/reopen/:experiment' do
       @experiment = Split::Experiment.find(params[:experiment])
       @experiment.reset_winner
+      redirect url('/')
+    end
+
+    post '/archive/:experiment' do
+      @experiment = Split::Experiment.find(params[:experiment])
+      @experiment.archive!
+      redirect url('/')
+    end
+
+    post '/unarchive/:experiment' do
+      @experiment = Split::Experiment.find(params[:experiment])
+      @experiment.unarchive!
       redirect url('/')
     end
 
